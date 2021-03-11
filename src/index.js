@@ -9,7 +9,7 @@ const customers = [];
 
 // Middleware
 function verifyIfExistsAccountCPF(req, res, next) {
-  const { cpf } = req.params;
+  const { cpf } = req.headers;
 
   const customer = customers.find(customer => customer.cpf === cpf);
   if(!customer) {
@@ -35,7 +35,7 @@ function getBalance(statement) {
 
 
 app.post("/account", (req, res) => {
-  const { cpf, name } = req.header;
+  const { cpf, name } = req.body;
 
   const customerAlreadyExists = customers.some((c) => c.cpf === cpf);
 
@@ -108,6 +108,29 @@ app.get("/statement/date", verifyIfExistsAccountCPF,(req, res) => {
   return res.json(statement);
 });
 
+app.put("/account", verifyIfExistsAccountCPF, (req, res) => {
+  const { name } = req.body;
+  const { customer } = req;
+
+  customer.name = name;
+
+  return res.status(201).send();
+});
+
+app.get("/account", verifyIfExistsAccountCPF, (req, res) => {
+  const { customer } = req;
+
+  return res.json(customer);
+});
+
+app.delete("/account", verifyIfExistsAccountCPF, (req, res) => {
+  const { customer } = req;
+
+  const index = customers.indexOf(customer);  
+  customers.splice(index, 1);
+
+  return res.status(200).json(customers);
+});
 
 
 app.listen(3333);
